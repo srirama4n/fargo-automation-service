@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "messageId": "01J9ZREPLY00000000000000000",
+  "occurredAt": "2026-10-15T13:05:04Z",
+  "taskId": "tsk_01J9Z",
+  "runId": "run_1042",
+  "customerId": "cust_8841",
+  "phase": "preview",
+  "status": "ok",
+  "quote": {
+    "quoteId": "Q-123",
+    "effect": "Future StreamFlix charges on Debit ••9034 will be declined",
+    "warnings": ["Today's $17.99 charge already posted", "Your StreamFlix account is not cancelled"],
+    "data": { "nextExpectedCharge": "2026-10-26" }
+  },
+  "outcome": null,
+  "error": null
+}

@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "quote": {
+    "quoteId": "Q-dev",
+    "effect": "Your bills this week are ready.",
+    "warnings": [],
+    "data": {}
+  },
+  "outcome": null,
+  "error": null
+}

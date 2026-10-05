@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "messageId": "01J9ZTASK000000000000000000",
+  "occurredAt": "2026-10-15T13:05:02Z",
+  "channel": "automation",
+  "taskId": "tsk_01J9Z",
+  "runId": "run_1042",
+  "customerId": "cust_8841",
+  "agentId": "agt_77",
+  "phase": "preview",
+  "intent": "card.merchant_block.preview",
+  "params": { "card": "card_tok_9034", "merchant": "m_streamflix" },
+  "quoteId": null,
+  "grantToken": "<signed JWT, section 8.2>",
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736"
+}

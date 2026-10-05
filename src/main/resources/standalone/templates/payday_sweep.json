@@ -1,0 +1,31 @@
+{
+  "templateId": "payday_sweep",
+  "version": 1,
+  "name": "Payday sweep",
+  "description": "Move extra payday money",
+  "trigger": { "type": "payroll_credit" },
+  "action": {
+    "type": "transfer",
+    "previewIntent": "transfer.preview",
+    "executeIntent": "transfer.execute"
+  },
+  "mode": "ASK",
+  "paramSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["from", "to", "amountAbove"],
+    "additionalProperties": false,
+    "properties": {
+      "from": { "type": "string", "pattern": "^acct_tok_[A-Za-z0-9]+$" },
+      "to": { "type": "string", "pattern": "^acct_tok_[A-Za-z0-9]+$" },
+      "amountAbove": { "type": "number", "exclusiveMinimum": 0 }
+    }
+  },
+  "limits": { "maxAmount": "10000", "maxRunsPerDay": null, "maxRunsPerPeriod": null },
+  "requiredTools": ["transfer.preview", "transfer.execute"],
+  "approvalTtl": "PT24H",
+  "effectText": "Move payday money above the amount you set.",
+  "status": "approved",
+  "reviewedBy": "standalone",
+  "reviewedAt": "2026-01-01T00:00:00Z"
+}

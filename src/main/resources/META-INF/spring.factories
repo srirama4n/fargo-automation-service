@@ -1,0 +1,5 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.wf.fargo.automation.standalone.StandaloneSafety,\
+com.wf.fargo.automation.standalone.StubCvamsClient,\
+com.wf.fargo.automation.standalone.EmbeddedMongoConfig,\
+com.wf.fargo.automation.standalone.EmbeddedKafkaConfig

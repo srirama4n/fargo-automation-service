@@ -1,0 +1,569 @@
+openapi: 3.0.3
+info:
+  title: Fargo Automation Service
+  version: 0.0.1
+  description: |
+    Section 9 of the automation service. Sixteen operations, plus the pause-all job
+    progress read named in endpoint 15. Errors are RFC 7807 problem+json with a stable `code`.
+servers:
+  - url: /
+paths:
+  /v1/confirmations:
+    post:
+      operationId: createConfirmation
+      summary: User tapped Create
+      tags: [app]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [templateId, templateVersion, params]
+              properties:
+                templateId: { type: string, example: payday_sweep }
+                templateVersion: { type: integer }
+                params: { type: object, additionalProperties: true }
+      responses:
+        "201":
+          description: Confirmation token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [confirmationToken, expiresAt]
+                properties:
+                  confirmationToken: { type: string }
+                  expiresAt: { type: string, format: date-time }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/customers/{customerId}/agents:
+    get:
+      operationId: listAgents
+      summary: List the caller's agents
+      tags: [app]
+      parameters:
+        - $ref: "#/components/parameters/customerId"
+        - name: status
+          in: query
+          schema: { type: string, example: "on,paused" }
+      responses:
+        "200":
+          description: Agents
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [agents]
+                properties:
+                  agents:
+                    type: array
+                    items: { $ref: "#/components/schemas/AgentSummary" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/agents/{agentId}:
+    get:
+      operationId: getAgent
+      summary: Agent detail
+      tags: [app]
+      parameters: [{ $ref: "#/components/parameters/agentId" }]
+      responses:
+        "200":
+          description: Agent
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentDetail" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    patch:
+      operationId: updateAgentStatus
+      summary: Pause or resume an agent
+      tags: [app]
+      parameters:
+        - $ref: "#/components/parameters/agentId"
+        - name: If-Match
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [on, paused] }
+      responses:
+        "200":
+          description: Updated status
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+    delete:
+      operationId: deleteAgent
+      summary: Delete an agent, revoke its grant, and expire pending approvals
+      tags: [app]
+      parameters: [{ $ref: "#/components/parameters/agentId" }]
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/approvals/{approvalId}:
+    get:
+      operationId: getApproval
+      summary: Approval card
+      tags: [app]
+      parameters: [{ $ref: "#/components/parameters/approvalId" }]
+      responses:
+        "200":
+          description: Approval
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Approval" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/approvals/{approvalId}/approve:
+    post:
+      operationId: approve
+      summary: Approve with a step-up token
+      tags: [app]
+      parameters:
+        - $ref: "#/components/parameters/approvalId"
+        - name: X-StepUp-Token
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, runState]
+                properties:
+                  status: { type: string, example: approved }
+                  runState: { type: string, example: executing }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+  /v1/approvals/{approvalId}/deny:
+    post:
+      operationId: deny
+      summary: Deny an approval
+      tags: [app]
+      parameters: [{ $ref: "#/components/parameters/approvalId" }]
+      responses:
+        "200":
+          description: Denied
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, example: denied }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+  /v1/customers/{customerId}/activity:
+    get:
+      operationId: listActivity
+      summary: Activity feed
+      tags: [app]
+      parameters:
+        - $ref: "#/components/parameters/customerId"
+        - name: before
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Activity page
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ActivityItem" }
+                  nextCursor: { type: string, nullable: true }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/templates:
+    get:
+      operationId: listTemplates
+      summary: Approved templates
+      tags: [mcp]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, example: approved }
+      responses:
+        "200":
+          description: Templates
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates]
+                properties:
+                  templates:
+                    type: array
+                    items: { $ref: "#/components/schemas/Template" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/agents/validate:
+    post:
+      operationId: validateAgent
+      summary: Policy check, saves nothing
+      tags: [mcp]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Draft" }
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Validation" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/agents:
+    post:
+      operationId: createAgent
+      summary: Create an agent from a confirmation token
+      tags: [mcp]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Draft"
+                - type: object
+                  required: [confirmationToken]
+                  properties:
+                    confirmationToken: { type: string }
+                    sourceUtterance: { type: string }
+                    sessionId: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [agentId, status, grantId]
+                properties:
+                  agentId: { type: string }
+                  status: { type: string, example: "on" }
+                  grantId: { type: string }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "422": { $ref: "#/components/responses/Problem" }
+  /v1/grants/{grantId}:
+    get:
+      operationId: getGrant
+      summary: Grant lookup for the MCP grant check
+      tags: [mcp]
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Grant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Grant" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /.well-known/jwks.json:
+    get:
+      operationId: jwks
+      summary: Public keys for grant tokens
+      tags: [mcp]
+      responses:
+        "200":
+          description: JWKS
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [keys]
+                properties:
+                  keys:
+                    type: array
+                    items: { type: object, additionalProperties: true }
+  /v1/admin/agents/pause-all:
+    post:
+      operationId: pauseAll
+      summary: Kill switch
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                templateId: { type: string, nullable: true }
+                reason: { type: string }
+                expirePending: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminJob" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/admin/jobs/{jobId}:
+    get:
+      operationId: getAdminJob
+      summary: Pause-all progress
+      tags: [admin]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminJob" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/admin/templates:
+    post:
+      operationId: publishTemplate
+      summary: Publish an approved template version
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TemplatePublish" }
+      responses:
+        "201":
+          description: Published
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templateId, version, status]
+                properties:
+                  templateId: { type: string }
+                  version: { type: integer }
+                  status: { type: string, example: approved }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+components:
+  parameters:
+    customerId:
+      name: customerId
+      in: path
+      required: true
+      schema: { type: string }
+    agentId:
+      name: agentId
+      in: path
+      required: true
+      schema: { type: string }
+    approvalId:
+      name: approvalId
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Problem:
+      description: RFC 7807 problem
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status, code, detail]
+      properties:
+        type: { type: string, example: https://errors.fargo/automation/agent_limit_reached }
+        title: { type: string }
+        status: { type: integer }
+        code: { type: string }
+        detail: { type: string }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/FieldError" }
+    FieldError:
+      type: object
+      required: [field, code, message]
+      properties:
+        field: { type: string }
+        code: { type: string }
+        message: { type: string }
+    AgentSummary:
+      type: object
+      properties:
+        agentId: { type: string }
+        name: { type: string }
+        templateId: { type: string }
+        mode: { type: string, enum: [ask, act_then_tell, read] }
+        status: { type: string, enum: [on, paused, deleted] }
+        effectText: { type: string }
+        createdAt: { type: string, format: date-time }
+        lastRun:
+          type: object
+          nullable: true
+          properties:
+            state: { type: string }
+            at: { type: string, format: date-time }
+    AgentDetail:
+      type: object
+      properties:
+        agentId: { type: string }
+        name: { type: string }
+        templateId: { type: string }
+        templateVersion: { type: integer }
+        mode: { type: string }
+        status: { type: string }
+        effectText: { type: string }
+        params: { type: object, additionalProperties: true }
+        trigger: { type: object, additionalProperties: true }
+        guards: { type: object, additionalProperties: true, nullable: true }
+        grant:
+          type: object
+          properties:
+            allowedTools: { type: array, items: { type: string } }
+            accountScopes: { type: array, items: { type: string } }
+        runs:
+          type: array
+          items:
+            type: object
+            properties:
+              runId: { type: string }
+              state: { type: string }
+              createdAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+    Approval:
+      type: object
+      properties:
+        approvalId: { type: string }
+        status: { type: string }
+        expiresAt: { type: string, format: date-time }
+        agent:
+          type: object
+          properties:
+            name: { type: string }
+        trigger: { type: object, additionalProperties: true }
+        preview:
+          type: object
+          properties:
+            effect: { type: string }
+            warnings: { type: array, items: { type: string } }
+            data: { type: object, additionalProperties: true }
+    ActivityItem:
+      type: object
+      properties:
+        eventId: { type: string }
+        type: { type: string }
+        message: { type: string }
+        agentId: { type: string }
+        runId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+    Template:
+      type: object
+      properties:
+        templateId: { type: string }
+        version: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        mode: { type: string }
+        paramSchema: { type: object, additionalProperties: true }
+        limits: { type: object, additionalProperties: true }
+        effectText: { type: string }
+    Draft:
+      type: object
+      required: [templateId, templateVersion, params]
+      properties:
+        templateId: { type: string }
+        templateVersion: { type: integer }
+        params: { type: object, additionalProperties: true }
+    Validation:
+      type: object
+      required: [valid, errors]
+      properties:
+        valid: { type: boolean }
+        draftHash: { type: string, nullable: true }
+        effectText: { type: string, nullable: true }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/FieldError" }
+    Grant:
+      type: object
+      properties:
+        grantId: { type: string }
+        agentId: { type: string }
+        customerId: { type: string }
+        allowedTools: { type: array, items: { type: string } }
+        accountScopes: { type: array, items: { type: string } }
+        limits: { type: object, additionalProperties: true }
+        revoked: { type: boolean }
+    AdminJob:
+      type: object
+      properties:
+        jobId: { type: string }
+        status: { type: string }
+        paused: { type: integer }
+        batches: { type: integer }
+    TemplatePublish:
+      type: object
+      required: [templateId, version, name, trigger, action, mode, requiredTools, effectText]
+      properties:
+        templateId: { type: string }
+        version: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        trigger:
+          type: object
+          properties:
+            type: { type: string }
+        action:
+          type: object
+          properties:
+            type: { type: string }
+            previewIntent: { type: string }
+            executeIntent: { type: string }
+        mode: { type: string, enum: [ask, act_then_tell, read] }
+        paramSchema: { type: object, additionalProperties: true }
+        limits: { type: object, additionalProperties: true }
+        requiredTools: { type: array, items: { type: string } }
+        approvalTtl: { type: string, description: ISO-8601 duration }
+        effectText: { type: string }
+        reviewedBy: { type: string }

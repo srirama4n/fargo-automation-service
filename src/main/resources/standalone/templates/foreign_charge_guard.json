@@ -1,0 +1,29 @@
+{
+  "templateId": "foreign_charge_guard",
+  "version": 1,
+  "name": "Foreign charge guard",
+  "description": "Lock the card when a foreign charge posts",
+  "trigger": { "type": "foreign_card_charge" },
+  "action": {
+    "type": "card.lock",
+    "previewIntent": "card.lock.preview",
+    "executeIntent": "card.lock.execute"
+  },
+  "mode": "ACT_THEN_TELL",
+  "paramSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["card"],
+    "additionalProperties": false,
+    "properties": {
+      "card": { "type": "string", "pattern": "^card_tok_[A-Za-z0-9]+$" }
+    }
+  },
+  "limits": { "maxAmount": null, "maxRunsPerDay": null, "maxRunsPerPeriod": null },
+  "requiredTools": ["card.lock.preview", "card.lock.execute"],
+  "approvalTtl": "PT24H",
+  "effectText": "Lock the card after a foreign charge.",
+  "status": "approved",
+  "reviewedBy": "standalone",
+  "reviewedAt": "2026-01-01T00:00:00Z"
+}

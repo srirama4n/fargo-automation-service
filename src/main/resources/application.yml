@@ -1,0 +1,55 @@
+automation:
+  dispatch:
+    mode: kafka                 # kafka | a2a
+  topics:
+    triggerFired: trigger-fired
+    automationReplies: automation-replies
+    agentControl: agent-control
+    baselineUpdates: baseline-updates
+    orchestratorInput: fargo-orchestrator-input   # confirm the real topic name
+  limits:
+    maxAgentsPerCustomer: 20
+    confirmationTtl: PT5M
+    grantTokenTtl: PT15M
+    defaultApprovalTtl: PT24H
+    stuckRunTimeout: PT10M
+  sweeper:
+    approvalExpiryCron: "0 * * * * *"     # every minute
+    stuckRunCron: "30 * * * * *"
+  scheduler:
+    pollInterval: PT30S
+    batchSize: 200
+  outbox:
+    pollInterval: PT2S
+    leaseDuration: PT30S
+    maxAttempts: 20
+  push:
+    baseUrl: https://push.internal.example
+  cvams:
+    baseUrl: https://cvams.internal.example
+  a2a:
+    supervisorUrl: https://supervisor.internal.example
+    timeout: PT60S
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/fargo_automation?replicaSet=rs0
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      enable-idempotence: true
+    listener:
+      ack-mode: manual
+    consumer:
+      group-id: automation-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      isolation-level: read_committed
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus

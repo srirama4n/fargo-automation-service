@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "messageId": "01J9ZBASELINE000000000000000",
+  "occurredAt": "2026-10-15T13:10:00Z",
+  "customerId": "cust_8841",
+  "cardToken": "card_tok_9034",
+  "merchantId": "m_streamflix",
+  "amount": 17.99,
+  "reason": "approval_denied"
+}

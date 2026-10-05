@@ -1,0 +1,19 @@
+automation:
+  standalone:
+    replyDelay: PT2S
+    mongoDataDir: ""            # empty = temp dir
+  dispatch:
+    mode: kafka
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.12
+spring:
+  mongodb:
+    embedded:
+      storage:
+        repl-set-name: rs0
+logging:
+  level:
+    com.wf.fargo.automation: DEBUG

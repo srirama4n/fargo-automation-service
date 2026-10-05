@@ -1,0 +1,14 @@
+---
+description: Fargo Automation Service rules
+alwaysApply: true
+---
+- The source of truth is @docs/automation-service-spec.md. Do not invent fields, topics, endpoints or states.
+- TDD: write or update tests first, run them, then implement until green. BDD scenarios in src/test/resources/features must pass.
+- Every state change on agent_runs or approvals is a conditional update on the expected current state (RunStateStore).
+- Every write that also sends a message (Kafka, push, A2A) uses the transactional outbox. Business code never calls Kafka, push or A2A directly.
+- Duplicate-key errors on agent_runs.idempotencyKey mean "already processed": log at INFO and acknowledge. They are not failures.
+- Never log or store raw account or card numbers. Only tokens. Never log grant tokens or confirmation tokens.
+- No execute task is ever sent for a run in mode=ask without an approved approval whose previewHash matches the stored quote.
+- Customer-facing message text comes from fixed templates, never from LLM output.
+- Use Java 21 records for DTOs and messages. No Lombok.
+- Errors are RFC 7807 problem+json with a stable `code` field.

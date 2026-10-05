@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "quote": {
+    "quoteId": "Q-dev",
+    "effect": "The card will be locked.",
+    "warnings": [],
+    "data": {}
+  },
+  "outcome": null,
+  "error": null
+}

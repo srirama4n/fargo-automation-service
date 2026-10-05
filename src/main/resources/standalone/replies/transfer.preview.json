@@ -1,0 +1,11 @@
+{
+  "status": "ok",
+  "quote": {
+    "quoteId": "Q-dev",
+    "effect": "Move the extra payday money.",
+    "warnings": [],
+    "data": {}
+  },
+  "outcome": null,
+  "error": null
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "messageId": "01J9ZTRIGGER0000000000000000",
+  "occurredAt": "2026-10-15T13:05:00Z",
+  "customerId": "cust_8841",
+  "agentId": "agt_77",
+  "periodId": "2026-10-15",
+  "eventRef": "post_99812",
+  "triggerType": "payroll_credit",
+  "context": { "amount": 1000.00, "currency": "USD", "payerId": "payer_acme", "confidence": "low" }
+}

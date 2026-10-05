@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "messageId": "01J9ZCONTROL0000000000000000",
+  "occurredAt": "2026-10-01T09:00:00Z",
+  "op": "upsert",
+  "customerId": "cust_8841",
+  "agentId": "agt_77",
+  "agentVersion": 3,
+  "triggerType": "recurring_charge_increased",
+  "accountScopes": ["card_tok_9034"],
+  "filters": { "threshold": "any_increase" },
+  "guards": { "oncePer": "billing_cycle" },
+  "backfill": true
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "messageId": "01J9ZTRIGGER0000000000000001",
+  "occurredAt": "2026-10-15T13:05:00Z",
+  "customerId": "cust_8841",
+  "agentId": "agt_77",
+  "periodId": "streamflix:2026-10",
+  "eventRef": "chg_streamflix",
+  "triggerType": "recurring_charge_increased",
+  "context": {
+    "merchantId": "m_streamflix",
+    "merchantName": "StreamFlix",
+    "oldAmount": 15.49,
+    "newAmount": 17.99,
+    "cardToken": "card_tok_9034"
+  }
+}

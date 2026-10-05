@@ -1,0 +1,30 @@
+{
+  "templateId": "subscription_price_guard",
+  "version": 1,
+  "name": "Subscription price guard",
+  "description": "Ask before a subscription price increase",
+  "trigger": { "type": "recurring_charge_increased" },
+  "action": {
+    "type": "card.merchant_block",
+    "previewIntent": "card.merchant_block.preview",
+    "executeIntent": "card.merchant_block.execute"
+  },
+  "mode": "ASK",
+  "paramSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["card", "merchant"],
+    "additionalProperties": false,
+    "properties": {
+      "card": { "type": "string", "pattern": "^card_tok_[A-Za-z0-9]+$" },
+      "merchant": { "type": "string" }
+    }
+  },
+  "limits": { "maxAmount": null, "maxRunsPerDay": null, "maxRunsPerPeriod": null },
+  "requiredTools": ["card.merchant_block.preview", "card.merchant_block.execute"],
+  "approvalTtl": "PT24H",
+  "effectText": "Block a higher subscription charge.",
+  "status": "approved",
+  "reviewedBy": "standalone",
+  "reviewedAt": "2026-01-01T00:00:00Z"
+}
